@@ -1,0 +1,17 @@
+"Id";"Designator";"Footprint";"Quantity";"Designation";"Supplier and ref";
+1;"U1";"SSOP-14_5.3x6.2mm_P0.65mm";1;"74HC14";;;
+2;"D2,D3,D4";"Osram_BPW34S-SMD";3;"BPW34-SMD";;;
+3;"SW3,SW1,SW2";"SW_DIP_SPSTx02_Slide_6.7x6.64mm_W6.73mm_P2.54mm_LowProfile_JPin";3;"SW_MEC_5E";;;
+4;"J1";"R_Array_SIP4";1;"OLED";;;
+5;"J4,J3";"R_Array_SIP6";2;"Jumper";;;
+6;"J2,J5";"R_Array_SIP6";2;"TSL2591";;;
+7;"C5,C8";"C_0603_1608Metric";2;"10uF";;;
+8;"R5,R2,R6,R4";"R_0603_1608Metric";4;"47k";;;
+9;"C4,C12,C7,C6";"C_0603_1608Metric";4;"0.1uF";;;
+10;"C11,C9,C10";"C_0603_1608Metric";3;"4.7pF";;;
+11;"U2";"TSSOP-8_4.4x3mm_P0.65mm";1;"AT24CS08-XHM";;;
+12;"R7";"R_0603_1608Metric";1;"1k";;;
+13;"R8";"R_0603_1608Metric";1;"0";;;
+14;"A1";"Arduino_Nano";1;"Arduino_Nano_v3.x";;;
+15;"R3,R1";"R_0603_1608Metric";2;"100k";;;
+16;"C3,C1,C2";"C_0603_1608Metric";3;"100pF";;;

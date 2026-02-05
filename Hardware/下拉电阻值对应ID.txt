@@ -1,7 +1,0 @@
-1k 
-22k 
-39k 
-68k 
-100k LM393
-220k 1 sensor
-470k 2 sensor 

@@ -35,7 +35,7 @@ uShutter is designed to work with:
 ## Project Structure
 /firmware    Code implementation 
 
-/hardware    Reference schematics and layouts (open)
+/hardware    Reference schematics and layouts
 
 /docs        Theory, usage, and build notes
 
@@ -50,3 +50,4 @@ This project is open by design and intent.
 uShutter is under active development.
 
 Interface stability and clarity take priority over feature expansion.
+

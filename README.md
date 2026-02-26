@@ -33,11 +33,11 @@ uShutter is designed to work with:
 * No specific sensor type, threshold method, or light source is assumed by the interface.
 
 ## Project Structure
-/firmware    Code implementation 
+/Firmware    Code implementation 
 
-/hardware    Reference schematics and layouts
+/Hardware    Reference schematics and layouts
 
-/docs        Theory, usage, and build notes
+[Theory, usage, and build notes](https://ushutter90.wordpress.com/how-to/)
 
 ## License
 Firmware: Apache License 2.0

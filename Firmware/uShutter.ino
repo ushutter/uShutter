@@ -7,7 +7,7 @@
 // Version
 // =================================================
 #define VERSION_STR "ver 0.9.4"
-#define NAME "uShutter-5"
+#define NAME "uShutter"
 #define SLOGAN ""
 
 // =================================================

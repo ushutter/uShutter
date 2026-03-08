@@ -4,7 +4,7 @@ This project has been split from a monolithic `.ino` into multiple translation u
 
 ## File responsibilities
 
-- `uShutter_v0_9_5_refactor_wip.ino`
+- `uShutter.ino`
   - Minimal Arduino entry placeholder.
   - Keep this tiny; do not put logic here.
 

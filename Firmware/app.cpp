@@ -11,7 +11,7 @@
 // =================================================
 // Version
 // =================================================
-#define VERSION_STR "ver 0.9.6"
+#define VERSION_STR "ver 0.9.7"
 #define NAME "uShutter"
 #define SLOGAN ""
 
@@ -23,6 +23,9 @@
 
 #define BTN_RESET 4            // Reset button pin (active-low)
 #define BTN_MODE 5
+#define CTRL 9
+#define ADC1 A7
+#define ADC2 A6
 #define BTN_DEBOUNCE_MS 50     // Button debounce time (ms)
 #define BTN_LONGPRESS_MS 1200  // Long press threshold (ms)
 
@@ -32,6 +35,9 @@
 
 // Dual-capture timeout: if a capture starts but doesn't complete -> ERROR
 #define CAPTURE_TIMEOUT_US 300000UL  // 300ms (tune if needed)
+
+// CTRL drives AO3400A gate for LED light source
+#define LIGHT_CTRL_ACTIVE_HIGH 1
 
 // Default mode:
 MeasureMode measure_mode = MODE_DUAL_CURTAIN;
@@ -79,6 +85,15 @@ SensorFrontend sensor_frontend = FRONTEND_FE1_DUAL;
 // Polarity: active_low=true means LOW = shutter open/light detected
 const bool active_low = true;
 
+
+static inline void setLightSource(bool on) {
+#if LIGHT_CTRL_ACTIVE_HIGH
+  digitalWrite(CTRL, on ? HIGH : LOW);
+#else
+  digitalWrite(CTRL, on ? LOW : HIGH);
+#endif
+}
+
 // Edge glitch filter (us). Single/Dual frontend paths are digital and usually clean.
 volatile uint16_t MIN_EDGE_SPACING_US = 0;
 
@@ -96,6 +111,7 @@ enum UIState { UI_READY,
                UI_UNSTABLE,
                UI_ERROR };
 UIState ui_state = UI_READY;
+bool alignment_mode = false;
 
 uint8_t error_code = 0;  // E01..E05
 
@@ -476,6 +492,38 @@ float stabilityScoreFromCV(float cv_percent) {
 // Keep the same visual structure as the dual realtime screen:
 // progress bar + shutter label + measured time + deviation.
 // =================================================
+
+// =================================================
+// Alignment screen
+// Keep visual layout unchanged.
+// =================================================
+void displayAlignmentScreen() {
+  int adc1 = analogRead(ADC1);
+  int adc2 = analogRead(ADC2);
+
+  u8g2.firstPage();
+  do {
+    u8g2.setFont(u8g2_font_6x10_tr);
+    u8g2.drawStr(LEFT_MARGIN, 12, "ALIGNMENT");
+
+    // Horizontal display: ADC2 on left, ADC1 on right
+    u8g2.setFont(u8g2_font_7x13B_tr);
+    char leftBuf[18], rightBuf[18];
+    snprintf(leftBuf, sizeof(leftBuf), "L:%d", adc1);
+    snprintf(rightBuf, sizeof(rightBuf), "R:%d", adc2);
+
+    int wr = u8g2.getStrWidth(rightBuf);
+    u8g2.drawStr(LEFT_MARGIN, 35, leftBuf);
+    u8g2.drawStr(128 - RIGHT_MARGIN - wr, 35, rightBuf);
+
+    // center separator
+    u8g2.drawVLine(64, 20, 28);
+
+    u8g2.setFont(u8g2_font_6x10_tr);
+    u8g2.drawStr(LEFT_MARGIN, 62, "Hold RESET to exit");
+  } while (u8g2.nextPage());
+}
+
 // =================================================
 // Reset button handler
 // - Short press: reset measurement
@@ -485,6 +533,8 @@ float stabilityScoreFromCV(float cv_percent) {
 bool handleResetButton() {
   static bool last_level = true;  // true = released (pull-up)
   static unsigned long t_last_change = 0;
+  static unsigned long t_pressed = 0;
+  static bool long_handled = false;
 
   bool level = digitalRead(BTN_RESET);  // HIGH released, LOW pressed
   unsigned long now_ms = millis();
@@ -494,12 +544,38 @@ bool handleResetButton() {
     t_last_change = now_ms;
     last_level = level;
 
-    // single click on release => reset
-    if (level) {
-      resetMeasurement();
+    if (!level) {
+      t_pressed = now_ms;
+      long_handled = false;
+    } else {
+      // released
+      if (!long_handled) {
+        if (!alignment_mode) {
+          // short click in normal mode => reset
+          resetMeasurement();
+        }
+        // short click in alignment mode: do nothing
+      }
     }
     return true;
   }
+
+  // long press enters/exits alignment mode
+  if (!level && !long_handled) {
+    if (now_ms - t_pressed >= BTN_LONGPRESS_MS) {
+      long_handled = true;
+      if (!alignment_mode) {
+        alignment_mode = true;
+        disableLightISR();
+        setLightSource(true);  // keep light on for alignment
+      } else {
+        alignment_mode = false;
+        resetMeasurement();
+      }
+      return true;
+    }
+  }
+
   return false;
 }
 
@@ -507,6 +583,7 @@ bool handleResetButton() {
 // - Single click: toggle mode (DUAL<->SINGLE)
 // - Double click (only FE Dual + SINGLE mode): toggle single sensor s1/s2
 bool handleModeButton() {
+  if (alignment_mode) return false;
   static bool last_level = true;
   static unsigned long t_last_change = 0;
   static unsigned long t_pressed = 0;
@@ -575,6 +652,8 @@ void setup() {
   configureSensorFrontend();
   pinMode(BTN_RESET, INPUT_PULLUP);
   pinMode(BTN_MODE, INPUT_PULLUP);
+  pinMode(CTRL, OUTPUT);
+  setLightSource(false);
 
   u8g2.begin();
 
@@ -606,6 +685,11 @@ void setup() {
 void loop() {
   handleResetButton();
   handleModeButton();
+
+  if (alignment_mode) {
+    displayAlignmentScreen();
+    return;
+  }
 
   if (ui_state == UI_ERROR) {
     displayErrorCode(error_code);

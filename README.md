@@ -1,4 +1,5 @@
 # uShutter
+![uShutter](Firmware/uShutter3.jpg)
 uShutter is an open, reproducible shutter timing specification and implementation, focused on time-domain shutter speed and curtain travel measurement.
 
 uShutter provides a firmware and multiple reference hardware interface implementation for measuring:

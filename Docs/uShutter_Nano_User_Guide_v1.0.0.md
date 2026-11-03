@@ -246,7 +246,6 @@ The installer tries the current bootloader at `115200` baud, then the old bootlo
 
 If the board is inside a case and the reset button cannot be reached, the reliable alternatives are a working DTR auto-reset circuit, a reset access hole, or a power-cycle procedure that actually removes power from the Nano. Pulling USB does not reset the board when another supply is still powering it.
 
-This installer is for an ATmega328P Nano. It is not for Nano Every, Nano 33, or a Raspberry Pi Pico.
 
 ## 11. Specifications
 
